@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js", 
+    "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -24,11 +24,13 @@
   },
   "homepage": "https://github.com/salazar-a/TC1-BD2#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^22.20.2",
+    "@types/pg": "^8.23.1",
     "typescript": "^7.0.2"
   }
 }
