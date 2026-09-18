@@ -25,6 +25,7 @@
   "homepage": "https://github.com/salazar-a/TC1-BD2#readme",
   "dependencies": {
     "express": "^5.2.1",
+    "jose": "^6.2.12",
     "pg": "^8.23.0"
   },
   "devDependencies": {

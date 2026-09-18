@@ -5,6 +5,7 @@ import { handleJsonError } from "./middleware/jsonError.js";
 import { pool } from "./database/pool.js";
 import { listReservations, createReservation, findReservationById, updateReservation, deleteReservation } from "./repositories/reservation.js";
 import { parseReservationId } from "./validation/id.js";
+import { requireReservationWriter } from "./middleware/requireReservationWriter.js";
 
 export const app = express();
 
@@ -83,7 +84,7 @@ app.get("/reservations/:id", async (req, res) => {
     }
 });
 
-app.post("/reservations", async (req, res) => {
+app.post("/reservations", requireReservationWriter, async (req, res) => {
     const result = validateReservation(req.body, getTodayInCostaRica());
 
     //Bad input case
@@ -101,7 +102,7 @@ app.post("/reservations", async (req, res) => {
     }
 });
 
-app.put("/reservations/:id", async (req, res) => {
+app.put("/reservations/:id", requireReservationWriter, async (req, res) => {
     //Parse and validate id
     const id = parseReservationId(req.params.id);
 
@@ -133,7 +134,7 @@ app.put("/reservations/:id", async (req, res) => {
     }
 });
 
-app.delete("/reservations/:id", async (req, res) => {
+app.delete("/reservations/:id", requireReservationWriter, async (req, res) => {
     //Parse and validate id
     const id = parseReservationId(req.params.id);
 
