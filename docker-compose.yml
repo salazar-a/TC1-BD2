@@ -10,6 +10,14 @@ services:
     volumes:
       - "postgres_data:/var/lib/postgresql/data"
       - "./sql:/docker-entrypoint-initdb.d:ro"
+    healthcheck:
+      test: 
+        - CMD-SHELL
+        - pg_isready -h 127.0.0.1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.4
     command: start-dev --import-realm
@@ -19,9 +27,23 @@ services:
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:?KC_BOOTSTRAP_ADMIN_PASSWORD must be a set}
       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:?KEYCLOAK_CLIENT_SECRET must be set}
+      - KC_HEALTH_ENABLED=true
     volumes:
       - "keycloak_data:/opt/keycloak/data"
       - "./keycloak:/opt/keycloak/data/import:ro"
+    healthcheck:
+      test: 
+        - CMD
+        - bash
+        - -ec
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000;
+          printf 'HEAD /health/ready HTTP/1.0\r\n\r\n' >&3;
+          grep -q 'HTTP/1.0 200' <&3
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
   app:
     build: .
     image: tc1-bd2-api
@@ -36,6 +58,26 @@ services:
       - OIDC_ISSUER=${OIDC_ISSUER}
       - OIDC_AUDIENCE=${OIDC_AUDIENCE}
       - OIDC_JWKS_URL=http://keycloak:8080/realms/reservations/protocol/openid-connect/certs
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:3000/ready', {
+            signal: AbortSignal.timeout(2000)
+          })
+          .then(response => process.exit(response.status === 200 ? 0 : 1))
+          .catch(() => process.exit(1))
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
 volumes:
   postgres_data: {}
   keycloak_data: {}
