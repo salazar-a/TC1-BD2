@@ -22,6 +22,20 @@ services:
     volumes:
       - "keycloak_data:/opt/keycloak/data"
       - "./keycloak:/opt/keycloak/data/import:ro"
+  app:
+    build: .
+    image: tc1-bd2-api
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      - OIDC_ISSUER=${OIDC_ISSUER}
+      - OIDC_AUDIENCE=${OIDC_AUDIENCE}
+      - OIDC_JWKS_URL=http://keycloak:8080/realms/reservations/protocol/openid-connect/certs
 volumes:
   postgres_data: {}
   keycloak_data: {}
