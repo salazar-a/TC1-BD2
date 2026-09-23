@@ -97,7 +97,7 @@ Las entradas inválidas devuelven 400. Las rutas protegidas devuelven 401 sin un
 
 ## Pruebas
 
-Con la pila de Compose en ejecución y `.env` copiado de `.env.example`:
+Con la pila de Compose en ejecución y un `.env` local configurado:
 
 ```sh
 npm ci

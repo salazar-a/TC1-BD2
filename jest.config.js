@@ -1,6 +1,6 @@
 import { loadEnvFile } from "node:process";
 
-loadEnvFile(".env.example");
+loadEnvFile(".env");
 
 export default {
     roots: ["<rootDir>/tests"],
