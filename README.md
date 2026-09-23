@@ -42,6 +42,8 @@ La API queda en `http://localhost:3000` y Keycloak en `http://localhost:8080` co
 
 Las rutas de lectura, salud y disponibilidad son públicas. Crear, actualizar y eliminar requieren un token de acceso de Keycloak con el rol `reservation_writer`. El realm `reservations` y el client `reservations-test` se importan al iniciar Keycloak.
 
+`keycloak/reservations-realm.json` contiene solo la configuración necesaria para esta API: el rol, el cliente con su audiencia y la cuenta de servicio con el rol asignado. Keycloak crea el resto de su configuración predeterminada al importar el realm. El secreto del cliente se toma de `KEYCLOAK_CLIENT_SECRET`.
+
 Con los valores de `.env.example`, se solicita un token al cliente importado:
 
 ```sh
@@ -105,6 +107,18 @@ npm test
 ```
 
 Las pruebas de integración detienen temporalmente PostgreSQL y reinician los contenedores.
+
+Para comprobar específicamente el archivo de importación con volúmenes nuevos, se puede usar un proyecto Compose temporal. Si la pila habitual está ocupando los mismos puertos, deténgala primero con `docker compose stop`. Desde la raíz del repositorio:
+
+```sh
+COMPOSE_PROJECT_NAME=realm-check docker compose up --build -d --wait
+COMPOSE_PROJECT_NAME=realm-check npm test
+COMPOSE_PROJECT_NAME=realm-check docker compose down -v
+```
+
+El primer comando importa el realm en un volumen nuevo. Las pruebas comprueban la emisión del token, su audiencia y el rol al crear una reserva; también prueban acceso denegado, operaciones de reservas y persistencia. El último comando elimina solo los contenedores y volúmenes del proyecto temporal. Si se detuvo la pila habitual, se puede reanudar con `docker compose up -d --wait`.
+
+Keycloak omite la importación al arrancar cuando el realm ya existe en su volumen. Por eso, editar el JSON no cambia un realm importado anteriormente; la prueba con `realm-check` verifica la nueva configuración sin borrar las reservas ni la configuración de la pila habitual.
 
 ## Persistencia
 
