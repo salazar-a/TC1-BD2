@@ -64,7 +64,7 @@ services:
         - node
         - -e
         - >-
-          fetch('http://127.0.0.1:3000/ready', {
+          fetch('http://127.0.0.1:3000/health', {
             signal: AbortSignal.timeout(2000)
           })
           .then(response => process.exit(response.status === 200 ? 0 : 1))
